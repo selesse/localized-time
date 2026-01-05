@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>localized-time Demo</title>
+  <script type="module" src="./demo.ts"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-bg: #eef2ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: linear-gradient(135deg, #f5f7ff 0%, #f0fdf4 100%);
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.5rem;
+    }
+
+    .tagline {
+      color: #64748b;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    section {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 1.25rem;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-light) 100%);
+      border-radius: 2px;
+    }
+
+    p {
+      margin: 0.75rem 0;
+    }
+
+    .example-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .example-row {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .example-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    localized-time {
+      --lt-underline-color: var(--accent);
+      --lt-popup-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.25);
+      --lt-focus-color: var(--accent);
+    }
+
+    .playground {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .playground-inputs {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .playground-inputs label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .playground-inputs input,
+    .playground-inputs select {
+      padding: 0.625rem 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .playground-inputs input:focus,
+    .playground-inputs select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-bg);
+    }
+
+    .playground-output {
+      padding: 1.25rem;
+      background: linear-gradient(135deg, var(--accent-bg) 0%, #f0fdf4 100%);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .note {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+
+    code {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 0.3em 0.5em;
+      border-radius: 6px;
+      font-size: 0.875em;
+      border: 1px solid #e2e8f0;
+      color: var(--accent);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --accent: #818cf8;
+        --accent-light: #a5b4fc;
+        --accent-bg: rgba(99, 102, 241, 0.15);
+      }
+
+      body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        color: #e2e8f0;
+      }
+
+      section {
+        background: #1e293b;
+        border-color: rgba(129, 140, 248, 0.2);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      }
+
+      h2 {
+        color: var(--accent-light);
+      }
+
+      .example-label,
+      .tagline,
+      .note {
+        color: #94a3b8;
+      }
+
+      .example-row {
+        border-bottom-color: #334155;
+      }
+
+      .playground-inputs label {
+        color: #94a3b8;
+      }
+
+      .playground-inputs input,
+      .playground-inputs select {
+        background: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
+      }
+
+      .playground-inputs input:focus,
+      .playground-inputs select:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-bg);
+      }
+
+      .playground-output {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        border-color: rgba(129, 140, 248, 0.3);
+      }
+
+      code {
+        background: #0f172a;
+        border-color: #334155;
+        color: var(--accent-light);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>localized-time</h1>
+  <p class="tagline">Click any timestamp to see timezone details</p>
+
+  <section>
+    <h2>Event Examples</h2>
+    <div class="example-row">
+      <div class="example-label">Concert in Los Angeles (11 PM PST)</div>
+      <p>Tickets go on sale at <localized-time from="2025-05-18T23:00:00-08:00"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Webinar from London (2 PM GMT)</div>
+      <p>The webinar starts at <localized-time from="2025-06-01T14:00:00+00:00"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Game release in Tokyo (midnight JST)</div>
+      <p>Game launches at <localized-time from="2025-04-15T00:00:00+09:00"></localized-time></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Format Options</h2>
+    <div class="example-row">
+      <div class="example-label">Short format</div>
+      <p><localized-time from="2025-05-18T23:00:00-08:00" format="short"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Medium format (default)</div>
+      <p><localized-time from="2025-05-18T23:00:00-08:00" format="medium"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Long format</div>
+      <p><localized-time from="2025-05-18T23:00:00-08:00" format="long"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Relative format (future)</div>
+      <p>Event starts <localized-time id="relative-future" format="relative"></localized-time></p>
+    </div>
+    <div class="example-row">
+      <div class="example-label">Relative format (past)</div>
+      <p>Registration closed <localized-time id="relative-past" format="relative"></localized-time></p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Viewer Timezone Override</h2>
+    <div class="example-row">
+      <div class="example-label">Same timestamp shown in different timezones:</div>
+      <p>
+        New York: <localized-time from="2025-05-18T23:00:00-08:00" viewer-tz="America/New_York"></localized-time><br>
+        London: <localized-time from="2025-05-18T23:00:00-08:00" viewer-tz="Europe/London"></localized-time><br>
+        Tokyo: <localized-time from="2025-05-18T23:00:00-08:00" viewer-tz="Asia/Tokyo"></localized-time>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Try It Yourself</h2>
+    <div class="playground">
+      <div class="playground-inputs">
+        <label>
+          Date & Time
+          <input type="datetime-local" id="input-datetime" value="2025-06-15T18:00">
+        </label>
+        <label>
+          Timezone
+          <select id="input-tz">
+            <option value="America/Los_Angeles">Pacific (US)</option>
+            <option value="America/Denver">Mountain (US)</option>
+            <option value="America/Chicago">Central (US)</option>
+            <option value="America/New_York">Eastern (US)</option>
+            <option value="UTC" selected>UTC</option>
+            <option value="Europe/London">London</option>
+            <option value="Europe/Paris">Paris</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+            <option value="Australia/Sydney">Sydney</option>
+          </select>
+        </label>
+      </div>
+      <div class="playground-output">
+        Your event: <span id="playground-output"></span>
+      </div>
+      <p class="note">Change the date/time and timezone above, then click the timestamp to see the conversion.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Usage</h2>
+    <p>Web Component:</p>
+    <code>&lt;localized-time from="2025-05-18T23:00:00-08:00"&gt;&lt;/localized-time&gt;</code>
+    <p>React:</p>
+    <code>&lt;LocalizedTime from="2025-05-18T23:00:00-08:00" /&gt;</code>
+  </section>
+</body>
+</html>
