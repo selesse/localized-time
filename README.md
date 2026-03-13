@@ -2,7 +2,10 @@
 
 A timezone-aware formatting and display library that makes it effortless to show timestamps in the user's local timezone.
 
-**[Live Demo](https://selesse.github.io/localized-time/)** | **[GitHub](https://github.com/selesse/localized-time)**
+[![npm version](https://img.shields.io/npm/v/localized-time.svg)](https://www.npmjs.com/package/localized-time)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://selesse.com/localized-time)
+[![GitHub](https://img.shields.io/badge/source-GitHub-lightgrey.svg)](https://github.com/selesse/localized-time)
 
 ## The Problem
 
@@ -22,6 +25,8 @@ Users shouldn't have to do timezone math. `localized-time` automatically convert
 - **Lightweight** - ~30KB gzipped per entry point (includes Temporal polyfill)
 
 ## Installation
+
+Available on [npm](https://www.npmjs.com/package/localized-time):
 
 ```bash
 npm install localized-time
@@ -61,7 +66,7 @@ function TicketSale() {
 }
 ```
 
-## Usage
+## How It Works
 
 Click any timestamp to see a popup with:
 - **Your local time** (converted)
@@ -248,4 +253,4 @@ bun run dev
 
 ## License
 
-Apache 2.0
+[Apache 2.0](LICENSE)
