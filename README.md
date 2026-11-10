@@ -114,6 +114,8 @@ The `relative` format displays human-friendly relative times like "in 5 hours", 
 
 Clicking a relative time still shows the popup with exact times and timezone details.
 
+Relative times keep themselves current while they're on the page: every second while showing seconds, every 10 seconds for minutes, every minute for hours, and hourly beyond that.
+
 ### Override Viewer Timezone
 
 Force display in a specific timezone:
@@ -145,7 +147,7 @@ Force display in a specific timezone:
 | `format` | FormatOption | `"short"`, `"medium"`, `"long"`, `"relative"`, or custom Intl options |
 | `className` | string | CSS class for the trigger element |
 | `style` | CSSProperties | Inline styles |
-| `renderPopup` | function | Custom popup renderer `(data: PopupData) => ReactNode` |
+| `renderPopup` | function | Custom popup renderer `(data: PopupData, placement: "above" \| "below", shift: number) => ReactNode`. `shift` is how many pixels to move the popup off-centre to stay inside the viewport |
 | `popupClassName` | string | CSS class for the popup |
 
 ### Core Functions

@@ -1,6 +1,6 @@
 {
   "name": "localized-time",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Timezone-aware formatting and display engine with UI components",
   "type": "module",
   "main": "./dist/core/index.js",
