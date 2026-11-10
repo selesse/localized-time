@@ -1,54 +1,39 @@
 # localized-time
 
-A timezone-aware formatting and display library that makes it effortless to show timestamps in the user's local timezone.
+Show timestamps in the reader's own timezone.
 
 [![npm version](https://img.shields.io/npm/v/localized-time.svg)](https://www.npmjs.com/package/localized-time)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen.svg)](https://selesse.com/localized-time)
-[![GitHub](https://img.shields.io/badge/source-GitHub-lightgrey.svg)](https://github.com/selesse/localized-time)
 
-## The Problem
+> Tickets go on sale at **11 PM PT**.
 
-> "Tickets go on sale at **11 PM PST**."
-> "Cool... what time is that *for me*?"
+Readers in New York, London, and Tokyo each have to work out what that means for them. With `localized-time`, each reader sees the time in their own timezone. Clicking it shows the original time and the difference:
 
-Users shouldn't have to do timezone math. `localized-time` automatically converts timestamps to the viewer's local timezone and shows the original for reference.
+```html
+Tickets go on sale at <localized-time from="2025-05-18T23:00:00-07:00"></localized-time>
+```
 
-## Features
+A reader in New York sees **May 19, 2:00 AM**. The popup shows the original time, May 18, 11:00 PM (GMT-7), and the difference, +3h.
 
-- **Automatic timezone conversion** - Powered by the Temporal API
-- **Relative time** - Display "in 5 hours" or "3 days ago"
-- **Web Component** - Works with any framework or vanilla JS
-- **React Component** - First-class React support
-- **Accessible** - ARIA attributes, keyboard navigation
-- **Customizable** - CSS variables, format presets, render props
-- **Lightweight** - ~23KB gzipped per entry point (includes Temporal polyfill)
+It ships as a web component that works anywhere and as a React component. [Try the demo.](https://selesse.com/localized-time)
 
-## Installation
-
-Available on [npm](https://www.npmjs.com/package/localized-time):
+## Install
 
 ```bash
 npm install localized-time
-# or
-bun add localized-time
-# or
-yarn add localized-time
 ```
 
-## Quick Start
+## Usage
 
-### Web Component
+### Web component
 
 ```html
 <script type="module">
   import "localized-time/web";
 </script>
 
-<p>
-  Tickets go on sale at
-  <localized-time from="2025-05-18T23:00:00-08:00"></localized-time>
-</p>
+<localized-time from="2025-05-18T23:00:00-07:00"></localized-time>
 ```
 
 ### React
@@ -56,69 +41,27 @@ yarn add localized-time
 ```tsx
 import { LocalizedTime } from "localized-time/react";
 
-function TicketSale() {
-  return (
-    <p>
-      Tickets go on sale at{" "}
-      <LocalizedTime from="2025-05-18T23:00:00-08:00" />
-    </p>
-  );
-}
+<LocalizedTime from="2025-05-18T23:00:00-07:00" />
 ```
 
-## How It Works
+`from` must be an ISO 8601 timestamp with an offset or `Z`, such as `2025-05-18T23:00:00-07:00` or `2025-05-19T06:00:00Z`. Without one, there's no way to know which timezone the time was written in.
 
-Click any timestamp to see a popup with:
-- **Your local time** (converted)
-- **Original time** (source timezone)
-- **Time difference** (+3h, -9h, etc.)
+### Formats
 
-### Timestamp Format
-
-The `from` attribute/prop accepts ISO 8601 strings with timezone:
-
-```
-2025-05-18T23:00:00-08:00      (offset)
-2025-05-18T23:00:00Z           (UTC)
-2025-05-18T23:00:00+09:00      (positive offset)
-```
-
-### Format Options
-
-| Format | Example Output |
-|--------|----------------|
+| `format` | Output |
+|----------|--------|
 | `short` | 11:00 PM |
 | `medium` (default) | May 18, 11:00 PM |
-| `long` | Sun, May 18, 2025, 11:00 PM |
+| `long` | Sun, May 18, 2025 at 11:00 PM |
 | `relative` | in 5 hours |
 
-```html
-<localized-time from="..." format="short"></localized-time>
-<localized-time from="..." format="long"></localized-time>
-<localized-time from="..." format="relative"></localized-time>
-```
+In React, `format` also accepts any `Intl.DateTimeFormatOptions` object.
 
-### Relative Time
+Relative times update themselves while they're on the page. They refresh every second while showing seconds, every 10 seconds for minutes, every minute for hours, and hourly beyond that.
 
-The `relative` format displays human-friendly relative times like "in 5 hours", "3 days ago", or "tomorrow". It automatically chooses the most appropriate unit (seconds, minutes, hours, days, months, or years).
+### Pinning the timezone
 
-```html
-<!-- Shows "in 5 hours" if the event is 5 hours away -->
-<p>Event starts <localized-time from="2025-05-18T23:00:00Z" format="relative"></localized-time></p>
-```
-
-```tsx
-// React
-<p>Event starts <LocalizedTime from="2025-05-18T23:00:00Z" format="relative" /></p>
-```
-
-Clicking a relative time still shows the popup with exact times and timezone details.
-
-Relative times keep themselves current while they're on the page: every second while showing seconds, every 10 seconds for minutes, every minute for hours, and hourly beyond that.
-
-### Override Viewer Timezone
-
-Force display in a specific timezone:
+By default, times are shown in the browser's timezone. To show a specific timezone instead:
 
 ```html
 <localized-time from="..." viewer-tz="Europe/London"></localized-time>
@@ -128,91 +71,41 @@ Force display in a specific timezone:
 <LocalizedTime from="..." viewerTz="Europe/London" />
 ```
 
-## API Reference
+## API
 
-### Web Component Attributes
+### Web component attributes
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `from` | string | **Required.** ISO 8601 timestamp with timezone |
-| `viewer-tz` | string | Override viewer's timezone (IANA or offset) |
-| `format` | string | `"short"`, `"medium"`, `"long"`, or `"relative"` |
+| Attribute | Description |
+|-----------|-------------|
+| `from` | **Required.** ISO 8601 timestamp with offset |
+| `format` | `short`, `medium`, `long` or `relative` |
+| `viewer-tz` | IANA timezone to show the time in, instead of the browser's |
 
-### React Props
+### React props
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `from` | string | **Required.** ISO 8601 timestamp with timezone |
-| `viewerTz` | string | Override viewer's timezone |
-| `format` | FormatOption | `"short"`, `"medium"`, `"long"`, `"relative"`, or custom Intl options |
-| `className` | string | CSS class for the trigger element |
-| `style` | CSSProperties | Inline styles |
-| `renderPopup` | function | Custom popup renderer `(data: PopupData, placement: "above" \| "below", shift: number) => ReactNode`. `shift` is how many pixels to move the popup off-centre to stay inside the viewport |
-| `popupClassName` | string | CSS class for the popup |
+| `from` | `string` | **Required.** ISO 8601 timestamp with offset |
+| `format` | `FormatOption` | A preset name, or `Intl.DateTimeFormatOptions` |
+| `viewerTz` | `string` | IANA timezone to show the time in, instead of the browser's |
+| `className`, `style` | | Applied to the timestamp |
+| `popupClassName` | `string` | Applied to the popup |
+| `renderPopup` | `(data, placement, shift) => ReactNode` | Replaces the popup. See [Custom popup](#custom-popup-react) |
 
-### Core Functions
+### Core
 
-For advanced usage, import from `localized-time/core`:
+`localized-time/core` contains the conversion and formatting functions the components use, for building your own UI:
 
 ```ts
-import {
-  convertTimestamp,
-  formatTime,
-  formatRelativeTime,
-  createPopupData,
-  // Adapter system
-  createEngine,
-  temporalAdapter,
-  type TimeAdapter,
-} from "localized-time/core";
+import { convertTimestamp, formatTime, formatRelativeTime } from "localized-time/core";
 
-// Convert a timestamp
-const result = convertTimestamp("2025-05-18T23:00:00-08:00", "America/New_York");
-console.log(result.localTime);      // ZonedDateTime
-console.log(result.diffHours);      // 3
-
-// Format for display
-const formatted = formatTime(result.localTime, "medium");  // "May 19, 2:00 AM"
-const relative = formatRelativeTime(result.localTime);     // "in 5 hours"
+const result = convertTimestamp("2025-05-18T23:00:00-07:00", "America/New_York");
+result.diffHours;                      // 3
+formatTime(result.localTime, "medium"); // "May 19, 2:00 AM"
+formatRelativeTime(result.localTime);   // e.g. "in 5 hours"
 ```
 
-## Customization
-
-### CSS Variables
-
-```css
-localized-time {
-  --lt-underline-color: #6366f1;
-  --lt-focus-color: #6366f1;
-  --lt-popup-bg: #ffffff;
-  --lt-popup-color: #1a1a1a;
-  --lt-popup-border-color: #e0e0e0;
-  --lt-popup-radius: 8px;
-  --lt-popup-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --lt-popup-font: system-ui, sans-serif;
-  --lt-popup-font-size: 14px;
-  --lt-popup-label-color: #666666;
-  --lt-popup-divider-color: #e0e0e0;
-}
-```
-
-### Custom Popup (React)
-
-```tsx
-<LocalizedTime
-  from="2025-05-18T23:00:00-08:00"
-  renderPopup={(data, placement, shift) => (
-    <div className={`my-popup my-popup-${placement}`} style={{ translate: `${shift}px` }}>
-      <strong>{data.localTimeFormatted}</strong>
-      <span>Originally: {data.originalTimeFormatted}</span>
-    </div>
-  )}
-/>
-```
-
-## Extensibility
-
-Support for other time libraries (Luxon, Day.js) via adapters:
+The core functions run on Temporal. To use a different date library such as Luxon or Day.js, implement `TimeAdapter` and pass it to `createEngine`:
 
 ```ts
 import { createEngine, type TimeAdapter } from "localized-time/core";
@@ -230,27 +123,59 @@ const luxonAdapter: TimeAdapter<DateTime> = {
 const engine = createEngine(luxonAdapter);
 ```
 
-## Browser Support
+## Styling
 
-Modern browsers with ES2022 support. The browser's native Temporal API is used where available, with a bundled polyfill otherwise.
+### CSS variables
+
+```css
+localized-time {
+  --lt-underline-color: #6366f1;
+  --lt-focus-color: #6366f1;
+  --lt-popup-bg: #ffffff;
+  --lt-popup-color: #1a1a1a;
+  --lt-popup-local-color: #1a1a1a;
+  --lt-popup-label-color: #666666;
+  --lt-popup-border-color: #e0e0e0;
+  --lt-popup-divider-color: #e0e0e0;
+  --lt-popup-radius: 8px;
+  --lt-popup-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --lt-popup-font: system-ui, sans-serif;
+  --lt-popup-font-size: 14px;
+  --lt-popup-z-index: 1000;
+}
+```
+
+### Custom popup (React)
+
+`renderPopup` receives three things:
+
+- the popup data: `localTimeFormatted`, `originalTimeFormatted`, `localTimezone`, `originalTimezone`, `diffFormatted` and `diffHours`
+- whether the popup is `"above"` or `"below"` the timestamp
+- `shift`, how many pixels to move the popup sideways to keep it inside the viewport
+
+```tsx
+<LocalizedTime
+  from="2025-05-18T23:00:00-07:00"
+  renderPopup={(data, placement, shift) => (
+    <div className={`my-popup my-popup-${placement}`} style={{ translate: `${shift}px` }}>
+      <strong>{data.localTimeFormatted}</strong>
+      <span>Originally {data.originalTimeFormatted}</span>
+    </div>
+  )}
+/>
+```
+
+## Browser support
+
+Any modern browser with ES2022 and BigInt support. The browser's own Temporal API is used when it has one. Otherwise, a bundled polyfill is used.
 
 ## Development
 
 ```bash
-# Install dependencies
 bun install
-
-# Run tests
 bun test
-
-# Build library
-bun run build
-
-# Build demo
-bun run build:demo
-
-# Start dev server
-bun run dev
+bun run build        # library → dist/
+bun run dev          # demo dev server
 ```
 
 ## License
