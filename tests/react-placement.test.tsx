@@ -119,3 +119,29 @@ describe("LocalizedTime popup placement", () => {
     act(() => root.unmount());
   });
 });
+
+describe("LocalizedTime popup clicks", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  test("stays open when the popup itself is clicked", async () => {
+    const { container, root } = await openWithTriggerAt(400);
+
+    const value = container.querySelector('[role="tooltip"] span') as HTMLElement;
+    await act(async () => value.click());
+
+    expect(container.querySelector('[role="tooltip"]')).toBeTruthy();
+    act(() => root.unmount());
+  });
+
+  test("closes when the trigger is clicked again", async () => {
+    const { container, root } = await openWithTriggerAt(400);
+
+    const trigger = container.querySelector('[role="button"]') as HTMLElement;
+    await act(async () => trigger.click());
+
+    expect(container.querySelector('[role="tooltip"]')).toBeNull();
+    act(() => root.unmount());
+  });
+});

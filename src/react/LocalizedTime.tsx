@@ -141,20 +141,29 @@ export function LocalizedTime({
     };
   }, [showPopup, handleClickOutside, handleKeydown]);
 
-  // Handle click on trigger
-  const handleClick = useCallback(() => {
-    setShowPopup((prev) => !prev);
-  }, []);
+  // The popup renders inside the trigger, so its events bubble up to the trigger's handlers
+  const isInsidePopup = useCallback(
+    (target: EventTarget) => containerRef.current?.lastElementChild?.contains(target as Node),
+    [],
+  );
 
-  // Handle keyboard activation
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (isInsidePopup(e.target)) return;
+      setShowPopup((prev) => !prev);
+    },
+    [isInsidePopup],
+  );
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (isInsidePopup(e.target)) return;
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        handleClick();
+        setShowPopup((prev) => !prev);
       }
     },
-    [handleClick],
+    [isInsidePopup],
   );
 
   // Error state
