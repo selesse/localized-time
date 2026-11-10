@@ -75,6 +75,17 @@ describe("LocalizedTimeElement", () => {
     expect(content).toMatch(/Invalid/);
   });
 
+  test("keeps an invalid timestamp out of the error markup", async () => {
+    const element = document.createElement("localized-time");
+    element.setAttribute("from", 'x" onmouseover="alert(1)');
+    document.body.appendChild(element);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const error = element.shadowRoot?.querySelector(".lt-error");
+    expect(error?.getAttributeNames().sort()).toEqual(["class", "title"]);
+    expect(error?.getAttribute("title")).toContain('x" onmouseover="alert(1)');
+  });
+
   test("respects format attribute", async () => {
     document.body.innerHTML = `
       <localized-time from="2025-05-18T12:00:00Z" viewer-tz="UTC" format="long"></localized-time>

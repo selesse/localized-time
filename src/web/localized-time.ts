@@ -109,8 +109,9 @@ export class LocalizedTimeElement extends HTMLElement {
       const message = error instanceof Error ? error.message : "Invalid timestamp";
       this.shadow.innerHTML = `
         <style>${styles}</style>
-        <span class="lt-error" title="${message}">[Invalid time]</span>
+        <span class="lt-error">[Invalid time]</span>
       `;
+      this.shadow.querySelector(".lt-error")?.setAttribute("title", message);
     }
   }
 
