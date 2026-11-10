@@ -22,7 +22,7 @@ Users shouldn't have to do timezone math. `localized-time` automatically convert
 - **React Component** - First-class React support
 - **Accessible** - ARIA attributes, keyboard navigation
 - **Customizable** - CSS variables, format presets, render props
-- **Lightweight** - ~30KB gzipped per entry point (includes Temporal polyfill)
+- **Lightweight** - ~23KB gzipped per entry point (includes Temporal polyfill)
 
 ## Installation
 
@@ -201,8 +201,8 @@ localized-time {
 ```tsx
 <LocalizedTime
   from="2025-05-18T23:00:00-08:00"
-  renderPopup={(data) => (
-    <div className="my-popup">
+  renderPopup={(data, placement, shift) => (
+    <div className={`my-popup my-popup-${placement}`} style={{ translate: `${shift}px` }}>
       <strong>{data.localTimeFormatted}</strong>
       <span>Originally: {data.originalTimeFormatted}</span>
     </div>
@@ -232,7 +232,7 @@ const engine = createEngine(luxonAdapter);
 
 ## Browser Support
 
-Modern browsers with ES2022 support. The Temporal API is polyfilled automatically.
+Modern browsers with ES2022 support. The browser's native Temporal API is used where available, with a bundled polyfill otherwise.
 
 ## Development
 

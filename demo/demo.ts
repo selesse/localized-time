@@ -1,4 +1,5 @@
 // Import and register the web component
+import { Temporal } from "temporal-polyfill";
 import "../src/web/index.ts";
 
 // Set up the relative time demos with dynamic timestamps
@@ -16,6 +17,8 @@ function initRelativeDemo() {
     const pastDate = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     relativePast.setAttribute("from", pastDate.toISOString());
   }
+
+  document.getElementById("relative-live")?.setAttribute("from", Temporal.Now.instant().toString());
 }
 
 // Initialize playground
