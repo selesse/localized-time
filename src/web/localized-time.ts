@@ -1,3 +1,4 @@
+import type { Temporal } from "temporal-polyfill";
 import {
   choosePlacement,
   convertTimestamp,
@@ -6,6 +7,7 @@ import {
   formatRelativeTime,
   formatTime,
   horizontalShift,
+  relativeRefreshDelay,
 } from "../core/index.js";
 import { styles } from "./styles.js";
 
@@ -25,6 +27,8 @@ export class LocalizedTimeElement extends HTMLElement {
 
   private shadow: ShadowRoot;
   private popupVisible = false;
+  private localTime?: Temporal.ZonedDateTime;
+  private refreshTimer?: ReturnType<typeof setTimeout>;
   private boundHandleOutsideClick: (e: MouseEvent) => void;
   private boundHandleKeydown: (e: KeyboardEvent) => void;
 
@@ -41,6 +45,7 @@ export class LocalizedTimeElement extends HTMLElement {
 
   disconnectedCallback() {
     this.setPopupVisible(false);
+    this.scheduleRefresh();
   }
 
   attributeChangedCallback() {
@@ -67,6 +72,8 @@ export class LocalizedTimeElement extends HTMLElement {
     if (!this.from) {
       this.shadow.innerHTML = `<span class="lt-error">Missing "from" attribute</span>`;
       this.setPopupVisible(false);
+      this.localTime = undefined;
+      this.scheduleRefresh();
       return;
     }
 
@@ -108,6 +115,8 @@ export class LocalizedTimeElement extends HTMLElement {
 
       this.setupEventListeners();
       this.setPopupVisible(this.popupVisible);
+      this.localTime = result.localTime;
+      this.scheduleRefresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Invalid timestamp";
       this.shadow.innerHTML = `
@@ -116,7 +125,22 @@ export class LocalizedTimeElement extends HTMLElement {
       `;
       this.shadow.querySelector(".lt-error")?.setAttribute("title", message);
       this.setPopupVisible(false);
+      this.localTime = undefined;
+      this.scheduleRefresh();
     }
+  }
+
+  private scheduleRefresh() {
+    clearTimeout(this.refreshTimer);
+    this.refreshTimer = undefined;
+    const localTime = this.localTime;
+    if (this.format !== "relative" || !localTime || !this.isConnected) return;
+
+    this.refreshTimer = setTimeout(() => {
+      const trigger = this.shadow.querySelector(".lt-trigger");
+      if (trigger) trigger.textContent = formatRelativeTime(localTime);
+      this.scheduleRefresh();
+    }, relativeRefreshDelay(localTime));
   }
 
   private setupEventListeners() {

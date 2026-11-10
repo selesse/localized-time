@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, jest, setSystemTime, test } from "bun:test";
 import { Window } from "happy-dom";
 
 const window = new Window({ url: "https://localhost:8080" });
@@ -143,5 +143,29 @@ describe("LocalizedTime popup clicks", () => {
 
     expect(container.querySelector('[role="tooltip"]')).toBeNull();
     act(() => root.unmount());
+  });
+});
+
+describe("LocalizedTime relative format", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+    setSystemTime();
+    document.body.innerHTML = "";
+  });
+
+  test("keeps the relative time current", async () => {
+    jest.useFakeTimers();
+    setSystemTime(new Date("2026-01-01T12:05:00Z"));
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => root.render(<LocalizedTime from="2026-01-01T12:00:00Z" format="relative" />));
+    expect(container.textContent).toBe("5 minutes ago");
+
+    for (let i = 0; i < 6; i++) act(() => jest.advanceTimersByTime(10_000));
+
+    expect(container.textContent).toBe("6 minutes ago");
+    act(() => root.unmount());
+    expect(jest.getTimerCount()).toBe(0);
   });
 });

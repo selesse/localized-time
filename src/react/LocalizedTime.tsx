@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Temporal } from "temporal-polyfill";
 import {
   choosePlacement,
   convertTimestamp,
@@ -18,6 +19,7 @@ import {
   horizontalShift,
   type PopupData,
   type PopupPlacement,
+  relativeRefreshDelay,
 } from "../core/index.js";
 import { Popup } from "./Popup.js";
 
@@ -98,13 +100,24 @@ export function LocalizedTime({
     }
   }, [from, viewerTz]);
 
+  const [now, setNow] = useState<Temporal.ZonedDateTime>();
+
+  useEffect(() => {
+    if (format !== "relative" || !conversionResult) return;
+    const timer = setTimeout(
+      () => setNow(Temporal.Now.zonedDateTimeISO()),
+      relativeRefreshDelay(conversionResult.localTime, now),
+    );
+    return () => clearTimeout(timer);
+  }, [conversionResult, format, now]);
+
   // Memoize display values
   const displayTime = useMemo(() => {
     if (!conversionResult) return null;
     return format === "relative"
-      ? formatRelativeTime(conversionResult.localTime)
+      ? formatRelativeTime(conversionResult.localTime, now)
       : formatTime(conversionResult.localTime, format);
-  }, [conversionResult, format]);
+  }, [conversionResult, format, now]);
 
   const popupData = useMemo(() => {
     if (!conversionResult) return null;

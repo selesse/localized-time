@@ -25,6 +25,7 @@ export {
   formatTime,
   getTimezoneLongName,
   getTimezoneName,
+  relativeRefreshDelay,
 } from "./format.js";
 export { choosePlacement, horizontalShift, type PopupPlacement } from "./placement.js";
 export type {

@@ -143,6 +143,27 @@ export function formatRelativeTime(
   }
 }
 
+const SECOND = 1_000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/**
+ * Milliseconds until a relative time should be re-rendered, based on the unit it's showing
+ */
+export function relativeRefreshDelay(
+  zdt: Temporal.ZonedDateTime,
+  now?: Temporal.ZonedDateTime,
+): number {
+  const nowTime = now || Temporal.Now.zonedDateTimeISO(zdt.timeZoneId);
+  const absMs = Math.abs(zdt.epochMilliseconds - nowTime.epochMilliseconds);
+
+  if (absMs < MINUTE) return SECOND;
+  if (absMs < HOUR) return 10 * SECOND;
+  if (absMs < DAY) return MINUTE;
+  return HOUR;
+}
+
 /**
  * Create popup data from a conversion result
  */

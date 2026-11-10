@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, describe, expect, jest, setSystemTime, test } from "bun:test";
 import { Window } from "happy-dom";
 
 // Create a window and set up globals
@@ -137,6 +137,57 @@ describe("LocalizedTimeElement", () => {
     expect(popup?.querySelector(".lt-popup-local")).toBeTruthy();
     expect(popup?.querySelector(".lt-popup-original")).toBeTruthy();
     expect(popup?.querySelector(".lt-popup-diff")).toBeTruthy();
+  });
+
+  describe("relative format", () => {
+    afterEach(() => {
+      jest.useRealTimers();
+      setSystemTime();
+    });
+
+    function mountRelative(from: string) {
+      const element = document.createElement("localized-time");
+      element.setAttribute("from", from);
+      element.setAttribute("format", "relative");
+      document.body.appendChild(element);
+      return element.shadowRoot?.querySelector(".lt-trigger") as HTMLElement;
+    }
+
+    test("keeps the relative time current", () => {
+      jest.useFakeTimers();
+      setSystemTime(new Date("2026-01-01T12:05:00Z"));
+      const trigger = mountRelative("2026-01-01T12:00:00Z");
+      expect(trigger.textContent).toBe("5 minutes ago");
+
+      jest.advanceTimersByTime(60_000);
+
+      const current = document
+        .querySelector("localized-time")
+        ?.shadowRoot?.querySelector(".lt-trigger");
+      expect(current?.textContent).toBe("6 minutes ago");
+    });
+
+    test("updates the text without replacing the focused trigger", () => {
+      jest.useFakeTimers();
+      setSystemTime(new Date("2026-01-01T12:05:00Z"));
+      const trigger = mountRelative("2026-01-01T12:00:00Z");
+      trigger.focus();
+
+      jest.advanceTimersByTime(60_000);
+
+      expect(trigger.isConnected).toBe(true);
+      expect(trigger.textContent).toBe("6 minutes ago");
+    });
+
+    test("stops ticking once removed from the page", () => {
+      jest.useFakeTimers();
+      setSystemTime(new Date("2026-01-01T12:05:00Z"));
+      mountRelative("2026-01-01T12:00:00Z");
+
+      document.querySelector("localized-time")?.remove();
+
+      expect(jest.getTimerCount()).toBe(0);
+    });
   });
 
   describe("popup state", () => {
