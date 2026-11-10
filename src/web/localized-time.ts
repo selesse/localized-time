@@ -39,7 +39,7 @@ export class LocalizedTimeElement extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.removeEventListeners();
+    this.setPopupVisible(false);
   }
 
   attributeChangedCallback() {
@@ -65,6 +65,7 @@ export class LocalizedTimeElement extends HTMLElement {
   private render() {
     if (!this.from) {
       this.shadow.innerHTML = `<span class="lt-error">Missing "from" attribute</span>`;
+      this.setPopupVisible(false);
       return;
     }
 
@@ -105,6 +106,7 @@ export class LocalizedTimeElement extends HTMLElement {
       `;
 
       this.setupEventListeners();
+      this.setPopupVisible(this.popupVisible);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Invalid timestamp";
       this.shadow.innerHTML = `
@@ -112,6 +114,7 @@ export class LocalizedTimeElement extends HTMLElement {
         <span class="lt-error">[Invalid time]</span>
       `;
       this.shadow.querySelector(".lt-error")?.setAttribute("title", message);
+      this.setPopupVisible(false);
     }
   }
 
@@ -130,28 +133,28 @@ export class LocalizedTimeElement extends HTMLElement {
   }
 
   private togglePopup() {
-    this.popupVisible = !this.popupVisible;
+    this.setPopupVisible(!this.popupVisible);
+  }
 
+  private setPopupVisible(visible: boolean) {
     const popup = this.shadow.querySelector(".lt-popup");
     const trigger = this.shadow.querySelector(".lt-trigger");
+    this.popupVisible = visible && Boolean(popup && trigger);
+    this.removeEventListeners();
+    if (!popup || !trigger) return;
 
-    if (popup && trigger) {
-      popup.classList.toggle("lt-hidden", !this.popupVisible);
-      trigger.setAttribute("aria-expanded", String(this.popupVisible));
+    popup.classList.toggle("lt-hidden", !this.popupVisible);
+    trigger.setAttribute("aria-expanded", String(this.popupVisible));
+    if (!this.popupVisible) return;
 
-      if (this.popupVisible) {
-        const placement = choosePlacement(
-          trigger.getBoundingClientRect(),
-          popup.getBoundingClientRect().height,
-          window.innerHeight,
-        );
-        popup.classList.toggle("lt-below", placement === "below");
-        document.addEventListener("click", this.boundHandleOutsideClick);
-        document.addEventListener("keydown", this.boundHandleKeydown);
-      } else {
-        this.removeEventListeners();
-      }
-    }
+    const placement = choosePlacement(
+      trigger.getBoundingClientRect(),
+      popup.getBoundingClientRect().height,
+      window.innerHeight,
+    );
+    popup.classList.toggle("lt-below", placement === "below");
+    document.addEventListener("click", this.boundHandleOutsideClick);
+    document.addEventListener("keydown", this.boundHandleKeydown);
   }
 
   private handleOutsideClick(e: MouseEvent) {
@@ -170,14 +173,7 @@ export class LocalizedTimeElement extends HTMLElement {
   }
 
   private closePopup() {
-    this.popupVisible = false;
-    const popup = this.shadow.querySelector(".lt-popup");
-    const trigger = this.shadow.querySelector(".lt-trigger");
-
-    if (popup) popup.classList.add("lt-hidden");
-    if (trigger) trigger.setAttribute("aria-expanded", "false");
-
-    this.removeEventListeners();
+    this.setPopupVisible(false);
   }
 
   private removeEventListeners() {

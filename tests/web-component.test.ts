@@ -139,6 +139,42 @@ describe("LocalizedTimeElement", () => {
     expect(popup?.querySelector(".lt-popup-diff")).toBeTruthy();
   });
 
+  describe("popup state", () => {
+    async function mount() {
+      document.body.innerHTML = `
+        <localized-time from="2025-05-18T12:00:00Z" viewer-tz="UTC"></localized-time>
+      `;
+      await new Promise((r) => setTimeout(r, 50));
+      const element = document.querySelector("localized-time") as HTMLElement;
+      const part = (selector: string) => element.shadowRoot?.querySelector(selector) as HTMLElement;
+      return { element, part };
+    }
+
+    test("stays open when an attribute changes while it's open", async () => {
+      const { element, part } = await mount();
+      part(".lt-trigger").click();
+
+      element.setAttribute("from", "2025-05-18T12:01:00Z");
+
+      expect(part(".lt-popup").classList.contains("lt-hidden")).toBe(false);
+      expect(part(".lt-trigger").getAttribute("aria-expanded")).toBe("true");
+      part(".lt-trigger").click();
+      expect(part(".lt-popup").classList.contains("lt-hidden")).toBe(true);
+    });
+
+    test("opens on the first click after being removed and re-added while open", async () => {
+      const { element, part } = await mount();
+      part(".lt-trigger").click();
+
+      element.remove();
+      document.body.appendChild(element);
+
+      expect(part(".lt-popup").classList.contains("lt-hidden")).toBe(true);
+      part(".lt-trigger").click();
+      expect(part(".lt-popup").classList.contains("lt-hidden")).toBe(false);
+    });
+  });
+
   describe("popup placement", () => {
     async function openWithTriggerAt(top: number) {
       document.body.innerHTML = `
