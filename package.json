@@ -75,6 +75,6 @@
     "url": "https://github.com/selesse/localized-time/issues"
   },
   "dependencies": {
-    "temporal-polyfill": "^0.3.0"
+    "temporal-polyfill": "^1.0.6"
   }
 }
