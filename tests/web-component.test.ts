@@ -127,6 +127,38 @@ describe("LocalizedTimeElement", () => {
     expect(popup?.querySelector(".lt-popup-original")).toBeTruthy();
     expect(popup?.querySelector(".lt-popup-diff")).toBeTruthy();
   });
+
+  describe("popup placement", () => {
+    async function openWithTriggerAt(top: number) {
+      document.body.innerHTML = `
+        <localized-time from="2025-05-18T12:00:00Z" viewer-tz="UTC"></localized-time>
+      `;
+      await new Promise((r) => setTimeout(r, 50));
+
+      const shadowRoot = document.querySelector("localized-time")?.shadowRoot;
+      const trigger = shadowRoot?.querySelector(".lt-trigger") as HTMLElement;
+      const popup = shadowRoot?.querySelector(".lt-popup") as HTMLElement;
+      trigger.getBoundingClientRect = () => ({ top, bottom: top + 20 }) as DOMRect;
+      popup.getBoundingClientRect = () => ({ height: 115 }) as DOMRect;
+
+      trigger.click();
+      return popup;
+    }
+
+    test("opens above the trigger when there is room", async () => {
+      const popup = await openWithTriggerAt(400);
+
+      expect(popup.classList.contains("lt-hidden")).toBe(false);
+      expect(popup.classList.contains("lt-below")).toBe(false);
+    });
+
+    test("opens below the trigger near the top of the viewport", async () => {
+      const popup = await openWithTriggerAt(70);
+
+      expect(popup.classList.contains("lt-hidden")).toBe(false);
+      expect(popup.classList.contains("lt-below")).toBe(true);
+    });
+  });
 });
 
 describe("register function", () => {

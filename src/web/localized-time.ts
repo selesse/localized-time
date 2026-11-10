@@ -1,4 +1,5 @@
 import {
+  choosePlacement,
   convertTimestamp,
   createPopupData,
   type FormatOption,
@@ -138,6 +139,12 @@ export class LocalizedTimeElement extends HTMLElement {
       trigger.setAttribute("aria-expanded", String(this.popupVisible));
 
       if (this.popupVisible) {
+        const placement = choosePlacement(
+          trigger.getBoundingClientRect(),
+          popup.getBoundingClientRect().height,
+          window.innerHeight,
+        );
+        popup.classList.toggle("lt-below", placement === "below");
         document.addEventListener("click", this.boundHandleOutsideClick);
         document.addEventListener("keydown", this.boundHandleKeydown);
       } else {
@@ -147,7 +154,7 @@ export class LocalizedTimeElement extends HTMLElement {
   }
 
   private handleOutsideClick(e: MouseEvent) {
-    if (!this.contains(e.target as Node)) {
+    if (!e.composedPath().includes(this)) {
       this.closePopup();
     }
   }

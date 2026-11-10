@@ -26,6 +26,7 @@ export {
   getTimezoneLongName,
   getTimezoneName,
 } from "./format.js";
+export { choosePlacement, type PopupPlacement } from "./placement.js";
 export type {
   ConversionResult,
   FormatOption,

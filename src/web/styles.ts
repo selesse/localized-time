@@ -58,6 +58,18 @@ export const styles = `
   border-top-color: var(--lt-popup-bg, #ffffff);
 }
 
+.lt-popup.lt-below {
+  bottom: auto;
+  top: calc(100% + 8px);
+}
+
+.lt-popup.lt-below::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--lt-popup-bg, #ffffff);
+}
+
 .lt-popup-row {
   display: flex;
   justify-content: space-between;
@@ -105,6 +117,11 @@ export const styles = `
 
   .lt-popup::after {
     border-top-color: var(--lt-popup-bg, #2a2a2a);
+  }
+
+  .lt-popup.lt-below::after {
+    border-top-color: transparent;
+    border-bottom-color: var(--lt-popup-bg, #2a2a2a);
   }
 }
 `;

@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import type { PopupPlacement } from "../core/placement.js";
 import type { PopupData } from "../core/types.js";
 
 export interface PopupProps {
   data: PopupData;
   className?: string;
+  placement?: PopupPlacement;
 }
 
 const defaultStyles = {
@@ -58,14 +60,31 @@ const defaultStyles = {
     border: "6px solid transparent",
     borderTopColor: "var(--lt-popup-bg, #ffffff)",
   },
+  popupBelow: {
+    bottom: "auto",
+    top: "calc(100% + 8px)",
+  },
+  arrowBelow: {
+    top: "auto",
+    bottom: "100%",
+    borderTopColor: "transparent",
+    borderBottomColor: "var(--lt-popup-bg, #ffffff)",
+  },
 };
 
 /**
  * Default popup component for displaying timezone details
  */
-export function Popup({ data, className }: PopupProps): ReactNode {
+export function Popup({ data, className, placement = "above" }: PopupProps): ReactNode {
+  const below = placement === "below";
   return (
-    <div className={className} style={defaultStyles.popup} role="tooltip" aria-live="polite">
+    <div
+      className={className}
+      style={below ? { ...defaultStyles.popup, ...defaultStyles.popupBelow } : defaultStyles.popup}
+      role="tooltip"
+      aria-live="polite"
+      data-placement={placement}
+    >
       <div style={defaultStyles.row}>
         <span style={defaultStyles.label}>Your time:</span>
         <span style={{ ...defaultStyles.value, ...defaultStyles.localValue }}>
@@ -82,7 +101,12 @@ export function Popup({ data, className }: PopupProps): ReactNode {
         <span style={defaultStyles.label}>Difference:</span>
         <span style={defaultStyles.value}>{data.diffFormatted}</span>
       </div>
-      <span style={defaultStyles.arrow} aria-hidden="true" />
+      <span
+        style={
+          below ? { ...defaultStyles.arrow, ...defaultStyles.arrowBelow } : defaultStyles.arrow
+        }
+        aria-hidden="true"
+      />
     </div>
   );
 }

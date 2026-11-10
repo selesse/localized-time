@@ -3,17 +3,20 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import {
+  choosePlacement,
   convertTimestamp,
   createPopupData,
   type FormatOption,
   formatRelativeTime,
   formatTime,
   type PopupData,
+  type PopupPlacement,
 } from "../core/index.js";
 import { Popup } from "./Popup.js";
 
@@ -28,11 +31,13 @@ export interface LocalizedTimeProps {
   className?: string;
   /** Inline styles for the trigger element */
   style?: CSSProperties;
-  /** Custom popup renderer */
-  renderPopup?: (data: PopupData) => ReactNode;
+  /** Custom popup renderer; placement is the side of the trigger it should open on */
+  renderPopup?: (data: PopupData, placement: PopupPlacement) => ReactNode;
   /** CSS class for the popup */
   popupClassName?: string;
 }
+
+const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const triggerStyles: CSSProperties = {
   display: "inline",
@@ -64,7 +69,22 @@ export function LocalizedTime({
   popupClassName,
 }: LocalizedTimeProps): ReactNode {
   const [showPopup, setShowPopup] = useState(false);
+  const [placement, setPlacement] = useState<PopupPlacement>("above");
   const containerRef = useRef<HTMLSpanElement>(null);
+
+  useBrowserLayoutEffect(() => {
+    const container = containerRef.current;
+    const popup = container?.lastElementChild;
+    if (!showPopup || !container || !popup) return;
+
+    setPlacement(
+      choosePlacement(
+        container.getBoundingClientRect(),
+        popup.getBoundingClientRect().height,
+        window.innerHeight,
+      ),
+    );
+  }, [showPopup]);
 
   // Memoize conversion result
   const conversionResult = useMemo(() => {
@@ -158,9 +178,9 @@ export function LocalizedTime({
       {displayTime}
       {showPopup &&
         (renderPopup ? (
-          renderPopup(popupData)
+          renderPopup(popupData, placement)
         ) : (
-          <Popup data={popupData} className={popupClassName} />
+          <Popup data={popupData} className={popupClassName} placement={placement} />
         ))}
     </span>
   );
