@@ -176,7 +176,7 @@ describe("LocalizedTimeElement", () => {
   });
 
   describe("popup placement", () => {
-    async function openWithTriggerAt(top: number) {
+    async function openWithTriggerAt(top: number, left = 400) {
       document.body.innerHTML = `
         <localized-time from="2025-05-18T12:00:00Z" viewer-tz="UTC"></localized-time>
       `;
@@ -185,8 +185,9 @@ describe("LocalizedTimeElement", () => {
       const shadowRoot = document.querySelector("localized-time")?.shadowRoot;
       const trigger = shadowRoot?.querySelector(".lt-trigger") as HTMLElement;
       const popup = shadowRoot?.querySelector(".lt-popup") as HTMLElement;
-      trigger.getBoundingClientRect = () => ({ top, bottom: top + 20 }) as DOMRect;
-      popup.getBoundingClientRect = () => ({ height: 115 }) as DOMRect;
+      trigger.getBoundingClientRect = () =>
+        ({ top, bottom: top + 20, left, right: left + 80 }) as DOMRect;
+      popup.getBoundingClientRect = () => ({ height: 115, width: 260 }) as DOMRect;
 
       trigger.click();
       return popup;
@@ -204,6 +205,18 @@ describe("LocalizedTimeElement", () => {
 
       expect(popup.classList.contains("lt-hidden")).toBe(false);
       expect(popup.classList.contains("lt-below")).toBe(true);
+    });
+
+    test("stays centred on the trigger when it fits", async () => {
+      const popup = await openWithTriggerAt(400);
+
+      expect(popup.style.getPropertyValue("--lt-shift")).toBe("0px");
+    });
+
+    test("shifts back inside the viewport near the right edge", async () => {
+      const popup = await openWithTriggerAt(400, 900);
+
+      expect(popup.style.getPropertyValue("--lt-shift")).toBe("-54px");
     });
   });
 });

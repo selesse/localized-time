@@ -5,6 +5,7 @@ import {
   type FormatOption,
   formatRelativeTime,
   formatTime,
+  horizontalShift,
 } from "../core/index.js";
 import { styles } from "./styles.js";
 
@@ -147,12 +148,13 @@ export class LocalizedTimeElement extends HTMLElement {
     trigger.setAttribute("aria-expanded", String(this.popupVisible));
     if (!this.popupVisible) return;
 
-    const placement = choosePlacement(
-      trigger.getBoundingClientRect(),
-      popup.getBoundingClientRect().height,
-      window.innerHeight,
-    );
+    const triggerRect = trigger.getBoundingClientRect();
+    const popupRect = popup.getBoundingClientRect();
+    const placement = choosePlacement(triggerRect, popupRect.height, window.innerHeight);
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const shift = horizontalShift(triggerRect, popupRect.width, viewportWidth);
     popup.classList.toggle("lt-below", placement === "below");
+    (popup as HTMLElement).style.setProperty("--lt-shift", `${shift}px`);
     document.addEventListener("click", this.boundHandleOutsideClick);
     document.addEventListener("keydown", this.boundHandleKeydown);
   }

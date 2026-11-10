@@ -6,6 +6,8 @@ export interface PopupProps {
   data: PopupData;
   className?: string;
   placement?: PopupPlacement;
+  /** Pixels to move the popup off-centre so it stays inside the viewport */
+  shift?: number;
 }
 
 const defaultStyles = {
@@ -75,12 +77,16 @@ const defaultStyles = {
 /**
  * Default popup component for displaying timezone details
  */
-export function Popup({ data, className, placement = "above" }: PopupProps): ReactNode {
+export function Popup({ data, className, placement = "above", shift = 0 }: PopupProps): ReactNode {
   const below = placement === "below";
   return (
     <div
       className={className}
-      style={below ? { ...defaultStyles.popup, ...defaultStyles.popupBelow } : defaultStyles.popup}
+      style={{
+        ...defaultStyles.popup,
+        ...(below && defaultStyles.popupBelow),
+        transform: `translateX(calc(-50% + ${shift}px))`,
+      }}
       role="tooltip"
       aria-live="polite"
       data-placement={placement}
@@ -102,9 +108,11 @@ export function Popup({ data, className, placement = "above" }: PopupProps): Rea
         <span style={defaultStyles.value}>{data.diffFormatted}</span>
       </div>
       <span
-        style={
-          below ? { ...defaultStyles.arrow, ...defaultStyles.arrowBelow } : defaultStyles.arrow
-        }
+        style={{
+          ...defaultStyles.arrow,
+          ...(below && defaultStyles.arrowBelow),
+          transform: `translateX(calc(-50% - ${shift}px))`,
+        }}
         aria-hidden="true"
       />
     </div>

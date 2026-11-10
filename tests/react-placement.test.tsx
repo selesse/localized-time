@@ -19,18 +19,24 @@ const { act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { LocalizedTime } = await import("../src/react/index");
 
-function stubLayout(triggerTop: number) {
+function stubLayout(triggerTop: number, triggerLeft: number) {
   window.HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
-    if (this.getAttribute("role") === "tooltip") return { height: 115 } as DOMRect;
-    return { top: triggerTop, bottom: triggerTop + 20 } as DOMRect;
+    if (this.getAttribute("role") === "tooltip") return { height: 115, width: 260 } as DOMRect;
+    return {
+      top: triggerTop,
+      bottom: triggerTop + 20,
+      left: triggerLeft,
+      right: triggerLeft + 80,
+    } as DOMRect;
   } as () => DOMRect;
 }
 
 async function openWithTriggerAt(
   triggerTop: number,
   element = <LocalizedTime from="2025-05-18T12:00:00Z" viewerTz="UTC" />,
+  triggerLeft = 400,
 ) {
-  stubLayout(triggerTop);
+  stubLayout(triggerTop, triggerLeft);
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -78,6 +84,38 @@ describe("LocalizedTime popup placement", () => {
 
     const popup = container.querySelector('[role="tooltip"]');
     expect(popup?.getAttribute("data-custom")).toBe("below");
+    act(() => root.unmount());
+  });
+
+  test("shifts back inside the viewport near the right edge", async () => {
+    const { container, root } = await openWithTriggerAt(
+      400,
+      <LocalizedTime from="2025-05-18T12:00:00Z" viewerTz="UTC" />,
+      900,
+    );
+
+    const popup = container.querySelector('[role="tooltip"]') as HTMLElement;
+    expect(popup.style.transform).toBe("translateX(calc(-50% + -54px))");
+    act(() => root.unmount());
+  });
+
+  test("passes the shift to a custom popup renderer", async () => {
+    const { container, root } = await openWithTriggerAt(
+      400,
+      <LocalizedTime
+        from="2025-05-18T12:00:00Z"
+        viewerTz="UTC"
+        renderPopup={(_data, _placement, shift) => (
+          <div role="tooltip" data-shift={shift}>
+            custom
+          </div>
+        )}
+      />,
+      900,
+    );
+
+    const popup = container.querySelector('[role="tooltip"]');
+    expect(popup?.getAttribute("data-shift")).toBe("-54");
     act(() => root.unmount());
   });
 });

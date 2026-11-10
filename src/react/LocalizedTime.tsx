@@ -15,6 +15,7 @@ import {
   type FormatOption,
   formatRelativeTime,
   formatTime,
+  horizontalShift,
   type PopupData,
   type PopupPlacement,
 } from "../core/index.js";
@@ -31,8 +32,11 @@ export interface LocalizedTimeProps {
   className?: string;
   /** Inline styles for the trigger element */
   style?: CSSProperties;
-  /** Custom popup renderer; placement is the side of the trigger it should open on */
-  renderPopup?: (data: PopupData, placement: PopupPlacement) => ReactNode;
+  /**
+   * Custom popup renderer. placement is the side of the trigger it should open on;
+   * shift is how many pixels to move it off-centre to stay inside the viewport.
+   */
+  renderPopup?: (data: PopupData, placement: PopupPlacement, shift: number) => ReactNode;
   /** CSS class for the popup */
   popupClassName?: string;
 }
@@ -70,6 +74,7 @@ export function LocalizedTime({
 }: LocalizedTimeProps): ReactNode {
   const [showPopup, setShowPopup] = useState(false);
   const [placement, setPlacement] = useState<PopupPlacement>("above");
+  const [shift, setShift] = useState(0);
   const containerRef = useRef<HTMLSpanElement>(null);
 
   useBrowserLayoutEffect(() => {
@@ -77,13 +82,11 @@ export function LocalizedTime({
     const popup = container?.lastElementChild;
     if (!showPopup || !container || !popup) return;
 
-    setPlacement(
-      choosePlacement(
-        container.getBoundingClientRect(),
-        popup.getBoundingClientRect().height,
-        window.innerHeight,
-      ),
-    );
+    const triggerRect = container.getBoundingClientRect();
+    const popupRect = popup.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    setPlacement(choosePlacement(triggerRect, popupRect.height, window.innerHeight));
+    setShift(horizontalShift(triggerRect, popupRect.width, viewportWidth));
   }, [showPopup]);
 
   // Memoize conversion result
@@ -178,9 +181,9 @@ export function LocalizedTime({
       {displayTime}
       {showPopup &&
         (renderPopup ? (
-          renderPopup(popupData, placement)
+          renderPopup(popupData, placement, shift)
         ) : (
-          <Popup data={popupData} className={popupClassName} placement={placement} />
+          <Popup data={popupData} className={popupClassName} placement={placement} shift={shift} />
         ))}
     </span>
   );

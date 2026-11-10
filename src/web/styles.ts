@@ -30,7 +30,7 @@ export const styles = `
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + var(--lt-shift, 0px)));
   z-index: var(--lt-popup-z-index, 1000);
 
   background: var(--lt-popup-bg, #ffffff);
@@ -53,7 +53,7 @@ export const styles = `
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% - var(--lt-shift, 0px)));
   border: 6px solid transparent;
   border-top-color: var(--lt-popup-bg, #ffffff);
 }
